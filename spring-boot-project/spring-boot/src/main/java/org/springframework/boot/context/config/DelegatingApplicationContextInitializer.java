@@ -63,7 +63,7 @@ public class DelegatingApplicationContextInitializer implements
 			applyInitializerClasses(context, initializerClasses);
 		}
 	}
-
+    // 处理properties中的配置context.initializer.classes 的初始化器
 	private List<Class<?>> getInitializerClasses(ConfigurableEnvironment env) {
 	    // 获得环境变量配置的属性
 		String classNames = env.getProperty(PROPERTY_NAME);

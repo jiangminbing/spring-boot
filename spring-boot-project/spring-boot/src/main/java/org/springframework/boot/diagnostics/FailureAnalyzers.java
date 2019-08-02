@@ -62,6 +62,7 @@ final class FailureAnalyzers implements SpringBootExceptionReporter {
 	FailureAnalyzers(ConfigurableApplicationContext context, ClassLoader classLoader) {
 		Assert.notNull(context, "Context must not be null");
 		this.classLoader = (classLoader != null) ? classLoader : context.getClassLoader();
+		// 加载spring.factories 中的Analyzer 分析类型
 		this.analyzers = loadFailureAnalyzers(this.classLoader);
 		prepareFailureAnalyzers(this.analyzers, context);
 	}

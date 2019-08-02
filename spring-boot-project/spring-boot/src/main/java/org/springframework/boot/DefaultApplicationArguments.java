@@ -75,12 +75,12 @@ public class DefaultApplicationArguments implements ApplicationArguments {
 		Source(String[] args) {
 			super(args);
 		}
-
+		// 没有选项 --spring.profile.active=dev
 		@Override
 		public List<String> getNonOptionArgs() {
 			return super.getNonOptionArgs();
 		}
-
+        // 有选项的参数  --spring.profile.active=dev,test
 		@Override
 		public List<String> getOptionValues(String name) {
 			return super.getOptionValues(name);

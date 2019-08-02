@@ -44,8 +44,10 @@ class OnResourceCondition extends SpringBootCondition {
 	@Override
 	public ConditionOutcome getMatchOutcome(ConditionContext context,
 			AnnotatedTypeMetadata metadata) {
+		// 注解元信息
 		MultiValueMap<String, Object> attributes = metadata
 				.getAllAnnotationAttributes(ConditionalOnResource.class.getName(), true);
+		// 资源加载器
 		ResourceLoader loader = (context.getResourceLoader() != null)
 				? context.getResourceLoader() : this.defaultResourceLoader;
 		List<String> locations = new ArrayList<>();
@@ -55,6 +57,7 @@ class OnResourceCondition extends SpringBootCondition {
 						+ "least one resource location");
 		List<String> missing = new ArrayList<>();
 		for (String location : locations) {
+			// 处理占位符
 			String resource = context.getEnvironment().resolvePlaceholders(location);
 			if (!loader.getResource(resource).exists()) {
 				missing.add(location);

@@ -82,6 +82,7 @@ public abstract class AutoConfigurationPackages {
 	 * @param packageNames the package names to set
 	 */
 	public static void register(BeanDefinitionRegistry registry, String... packageNames) {
+		// 注册一个特殊类 这个类在容器启动时候使用
 	    // 如果已经存在该 BEAN ，则修改其包（package）属性
 		if (registry.containsBeanDefinition(BEAN)) {
 			BeanDefinition beanDefinition = registry.getBeanDefinition(BEAN);
@@ -114,6 +115,7 @@ public abstract class AutoConfigurationPackages {
 
 		@Override
 		public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+			// @AutoConfigurationPackage 也就是标注@SpringbootAppliaction 标注这个注解类所在的包的名称 比如com.example.demo
 			register(registry, new PackageImport(metadata).getPackageName());
 		}
 

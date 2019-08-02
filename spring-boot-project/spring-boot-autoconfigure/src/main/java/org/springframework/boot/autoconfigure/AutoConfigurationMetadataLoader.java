@@ -30,6 +30,8 @@ import java.util.Set;
  * Internal utility used to load {@link AutoConfigurationMetadata}.
  *
  * @author Phillip Webb
+ * spring-autoconfigure-metadata.properties 存放自动化配置中元注解的内容，自动装配无需ClassLoader ，可以得到元注解的内容
+ * 减少计算的时间加快自动装配的速度
  */
 final class AutoConfigurationMetadataLoader {
 

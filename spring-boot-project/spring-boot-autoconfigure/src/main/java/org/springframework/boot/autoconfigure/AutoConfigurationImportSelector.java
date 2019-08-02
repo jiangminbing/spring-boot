@@ -103,7 +103,7 @@ public class AutoConfigurationImportSelector
 		}
 		// 2. 获得注解的属性
 		AnnotationAttributes attributes = getAttributes(annotationMetadata);
-		// 3. 获得符合条件的配置类的数组
+		// 3. 获得符合条件的配置类的数组,从spring.factories 中获取
 		List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
 		// 3.1 移除重复的配置类
 		configurations = removeDuplicates(configurations);

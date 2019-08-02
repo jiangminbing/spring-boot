@@ -140,6 +140,10 @@ class SharedMetadataReaderFactoryContextInitializer implements
 			return true;
 		}
 
+		/**
+		 * 容器刷新的时候将缓存清理
+		 * @param event
+		 */
 		@Override
 		public void onApplicationEvent(ContextRefreshedEvent event) {
 			this.metadataReaderFactory.clearCache();

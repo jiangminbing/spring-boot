@@ -29,6 +29,8 @@ import java.util.Set;
  * dealing with system exit.
  *
  * @author Phillip Webb
+ *
+ * UncaughtExceptionHandler 主线程异常产生未被捕获将触发
  */
 class SpringBootExceptionHandler implements UncaughtExceptionHandler {
 

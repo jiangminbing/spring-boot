@@ -41,6 +41,11 @@ import org.springframework.util.ErrorHandler;
  * @author Stephane Nicoll
  * @author Andy Wilkinson
  * @author Artsiom Yudovin
+ * 1.4版本之前springboot 和 spring 中监听事件的关系
+ * springboot 可以通过配置在spring.factories 中的listener 的监听器 可以监听到spring中的事件比如：ContextRefreshedEvent
+ * spring 可以通过实现ApplicationContextListener 或者@EventListener 的方式监听到部分springboot的事件，比较有：ApplicationReadyEvent和ApplicationFailedEvent
+ * 之所以会出现这种的原因是springboot  和 spring 公用一个事件广播器
+ * 1.4 版本之后两个的事件互相不干涉
  */
 public class EventPublishingRunListener implements SpringApplicationRunListener, Ordered {
 
@@ -54,6 +59,8 @@ public class EventPublishingRunListener implements SpringApplicationRunListener,
 	private final String[] args;
     /**
      * 事件广播器
+	 *  在spring framerwork ApplicationContext 容器发布时事件的时候也是用了SimpleApplicationEventMulticaster
+	 *  进行事件的广播
      */
 	private final SimpleApplicationEventMulticaster initialMulticaster;
 
@@ -83,12 +90,12 @@ public class EventPublishingRunListener implements SpringApplicationRunListener,
 		this.initialMulticaster.multicastEvent(new ApplicationEnvironmentPreparedEvent(this.application, this.args, environment));
 	}
 
-	@Override // ApplicationContextInitializedEvent
+	@Override // ApplicationContextInitializedEvent 准备好容器上下文，容器注入主引导类和前置方法
 	public void contextPrepared(ConfigurableApplicationContext context) {
 		this.initialMulticaster.multicastEvent(new ApplicationContextInitializedEvent(this.application, this.args, context));
 	}
 
-	@Override // ApplicationPreparedEvent
+	@Override // ApplicationPreparedEvent 刷新完容器上下文后，容器将所有注解内容的类进行解析注入
 	public void contextLoaded(ConfigurableApplicationContext context) {
 		for (ApplicationListener<?> listener : this.application.getListeners()) {
 			if (listener instanceof ApplicationContextAware) {

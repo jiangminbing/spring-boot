@@ -92,6 +92,7 @@ public @interface ConditionalOnBean {
 	String[] name() default {};
 
 	/**
+	 * 三种应用上下文检索 父类 当前 所有
 	 * Strategy to decide if the application context hierarchy (parent contexts) should be
 	 * considered.
 	 * @return the search strategy

@@ -58,6 +58,8 @@ import java.security.AccessControlException;
 import java.util.*;
 
 /**
+ *
+ *  大致的把启动过程 分为SpringApplication 初始化阶段（构造、配置两个阶段） 运行阶段 结束阶段
  * Class that can be used to bootstrap and launch a Spring application from a Java main
  * method. By default class will perform the following steps to bootstrap your
  * application:
@@ -219,7 +221,7 @@ public class SpringApplication {
 	private WebApplicationType webApplicationType;
 
     /**
-     * 是否 AWT headless
+     * 是否 AWT headless （是否缺失显示屏 ，鼠标，键盘等）
      */
 	private boolean headless = true;
 
@@ -279,11 +281,14 @@ public class SpringApplication {
 	 * @see #run(Class, String[])
 	 * @see #setSources(Set)
 	 */
+	// 构造过程
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SpringApplication(ResourceLoader resourceLoader, Class<?>... primarySources) {
+		// SpringApplication 的构造过程
 		this.resourceLoader = resourceLoader;
 		Assert.notNull(primarySources, "PrimarySources must not be null");
 		this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
+		// 根据当前类路径下的类判定应用是Reactive Web 或者是Servlet Web 应用
 		this.webApplicationType = WebApplicationType.deduceFromClasspath();
 		// 初始化 initializers 属性
 		setInitializers((Collection) getSpringFactoriesInstances(ApplicationContextInitializer.class));
@@ -324,8 +329,9 @@ public class SpringApplication {
 		Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList<>();
 		// 配置 headless 属性
 		configureHeadlessProperty();
-		// 获得 SpringApplicationRunListener 的数组，并启动监听
+		// 获得 SpringApplicationRunListener 的数组，并启动监听 从spring.factories
 		SpringApplicationRunListeners listeners = getRunListeners(args);
+		// 开始启动运行
 		listeners.starting();
 		try {
 		    // 创建  ApplicationArguments 对象
@@ -355,6 +361,7 @@ public class SpringApplication {
 				new StartupInfoLogger(this.mainApplicationClass).logStarted(getApplicationLog(), stopWatch);
 			}
 			// 通知 SpringApplicationRunListener 的数组，Spring 容器启动完成。
+			// 启动完成后
 			listeners.started(context);
 			// 调用 ApplicationRunner 或者 CommandLineRunner 的运行方法。TODO
 			callRunners(context, applicationArguments);
@@ -366,6 +373,7 @@ public class SpringApplication {
 
         // 通知 SpringApplicationRunListener 的数组，Spring 容器运行中。
 		try {
+			// 运行中
 			listeners.running(context);
 		} catch (Throwable ex) {
             // 如果发生异常，则进行处理，并抛出 IllegalStateException 异常
@@ -434,6 +442,7 @@ public class SpringApplication {
         // 加载 BeanDefinition 们
 		Set<Object> sources = getAllSources();
 		Assert.notEmpty(sources, "Sources must not be empty");
+		// 将构建引导配置类BeanDefinition注册到容器中，AnnotationConfigUtils 中注册ConfigurationClassPostProcess负责解析
 		load(context, sources.toArray(new Object[0]));
         // 通知 SpringApplicationRunListener 的数组，Spring 容器加载完成。
         listeners.contextLoaded(context);
@@ -883,7 +892,7 @@ public class SpringApplication {
 		}
 	}
 
-	// TODO
+	// 具体实例参考spring-boot-1.3.x-project 里面退出码 和 退出码异常匹配  主导类异常未捕获
 	private void handleRunFailure(ConfigurableApplicationContext context,
 			Throwable exception,
 			Collection<SpringBootExceptionReporter> exceptionReporters,
@@ -911,6 +920,8 @@ public class SpringApplication {
 	private void reportFailure(Collection<SpringBootExceptionReporter> exceptionReporters,
 			Throwable failure) {
 		try {
+			// exceptionReporters 参数为 spring.factories 中的错误分析 FailureAnalyzers
+			// 构造的时候会让加载spring.factories中的集合 FailureAnalyzer
 			for (SpringBootExceptionReporter reporter : exceptionReporters) {
 				if (reporter.reportException(failure)) {
 					registerLoggedException(failure);
@@ -942,11 +953,13 @@ public class SpringApplication {
 	private void handleExitCode(ConfigurableApplicationContext context,
 			Throwable exception) {
 		int exitCode = getExitCodeFromException(context, exception);
+		// exitCode == 0 是应用的正常退出
 		if (exitCode != 0) {
 			if (context != null) {
 				context.publishEvent(new ExitCodeEvent(context, exitCode));
 			}
 			SpringBootExceptionHandler handler = getSpringBootExceptionHandler();
+			// 注册异常和对应的异常返回码
 			if (handler != null) {
 				handler.registerExitCode(exitCode);
 			}
@@ -955,6 +968,7 @@ public class SpringApplication {
 
 	private int getExitCodeFromException(ConfigurableApplicationContext context,
 			Throwable exception) {
+		// 退出码异常映射
 		int exitCode = getExitCodeFromMappedException(context, exception);
 		if (exitCode == 0) {
 			exitCode = getExitCodeFromExitCodeGeneratorException(exception);
@@ -968,12 +982,13 @@ public class SpringApplication {
 			return 0;
 		}
 		ExitCodeGenerators generators = new ExitCodeGenerators();
+		// 异常和退出码的关系
 		Collection<ExitCodeExceptionMapper> beans = context
 				.getBeansOfType(ExitCodeExceptionMapper.class).values();
 		generators.addAll(exception, beans);
 		return generators.getExitCode();
 	}
-
+    // 递归取出退出码
 	private int getExitCodeFromExitCodeGeneratorException(Throwable exception) {
 		if (exception == null) {
 			return 0;

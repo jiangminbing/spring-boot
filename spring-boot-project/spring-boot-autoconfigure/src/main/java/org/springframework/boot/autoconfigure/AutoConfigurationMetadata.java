@@ -52,6 +52,8 @@ public interface AutoConfigurationMetadata {
 	Integer getInteger(String className, String key, Integer defaultValue);
 
 	/**
+	 *  获取自动装配类中的原注解
+	 *  例如 getSet("org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration","ConditionalOnClass")
 	 * Get a {@link Set} value from the meta-data.
 	 * @param className the source class
 	 * @param key the meta-data key

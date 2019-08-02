@@ -151,7 +151,7 @@ public class ConfigFileApplicationListener implements EnvironmentPostProcessor, 
 	private void onApplicationEnvironmentPreparedEvent(ApplicationEnvironmentPreparedEvent event) {
 		// 加载指定类型 EnvironmentPostProcessor 对应的，在 `META-INF/spring.factories` 里的类名的数组
 	    List<EnvironmentPostProcessor> postProcessors = loadPostProcessors();
-	    // 加入自己
+	    // ConfigFileApplicationListener 也实现了接口 在这里把自己加进去
 		postProcessors.add(this);
 		// 排序 postProcessors 数组
 		AnnotationAwareOrderComparator.sort(postProcessors);
@@ -184,7 +184,8 @@ public class ConfigFileApplicationListener implements EnvironmentPostProcessor, 
 	 * @see #addPostProcessors(ConfigurableApplicationContext)
 	 */
 	protected void addPropertySources(ConfigurableEnvironment environment,ResourceLoader resourceLoader) {
-	    // 添加 RandomValuePropertySource 到 environment 中
+	    // 添加 RandomValuePropertySource 到 environment 中 ，添加这个属性的作用 可以使用获取随机的数字
+		// 通过以下这中方式@Value($｛random.int｝)或者在配置文件中添加server.port=$｛random.int｝
 		RandomValuePropertySource.addToEnvironment(environment);
 		// 创建 Loader 对象，进行加载
 		new Loader(environment, resourceLoader).load();
@@ -296,6 +297,7 @@ public class ConfigFileApplicationListener implements EnvironmentPostProcessor, 
 			// 创建 DefaultResourceLoader 对象
 			this.resourceLoader = (resourceLoader != null) ? resourceLoader : new DefaultResourceLoader();
 			// 加载指定类型 PropertySourceLoader 对应的，在 `META-INF/spring.factories` 里的类名的数组
+			// 这里也可以自定义其他文件格式的PropertySourceLoader
 			this.propertySourceLoaders = SpringFactoriesLoader.loadFactories(PropertySourceLoader.class, getClass().getClassLoader());
 		}
 
@@ -315,7 +317,7 @@ public class ConfigFileApplicationListener implements EnvironmentPostProcessor, 
 				if (profile != null && !profile.isDefaultProfile()) {
 					addProfileToEnvironment(profile.getName());
 				}
-				// 加载配置
+				// 加载配置 加载类路径下面的配置文件
 				load(profile, this::getPositiveProfileFilter,
 						addToLoaded(MutablePropertySources::addLast, false));
 				// 添加到 processedProfiles 中，表示已处理
@@ -468,12 +470,15 @@ public class ConfigFileApplicationListener implements EnvironmentPostProcessor, 
 			}
 			Set<String> processed = new HashSet<>(); // 已处理的文件后缀集合
 		    // 遍历 propertySourceLoaders 数组，逐个使用 PropertySourceLoader 读取配置
+			// spring.factories 中的两个资源类型 PropertiesPropertySourceLoader和YamlPropertySourceLoader
 			for (PropertySourceLoader loader : this.propertySourceLoaders) {
 			    // 遍历每个 PropertySourceLoader 可处理的文件后缀集合
+				// loader.getFileExtensions() 获取的集合为[xml,properties]
 				for (String fileExtension : loader.getFileExtensions()) {
 				    // 添加到 processed 中，一个文件后缀，有且仅能被一个 PropertySourceLoader 所处理
 					if (processed.add(fileExtension)) {
 					    // 加载 Profile 指定的配置文件（带后缀）
+						// 比如classpath:/appliaction.porperties
 						loadForFileExtension(loader, location + name, "." + fileExtension,
 								profile, filterFactory, consumer);
 					}

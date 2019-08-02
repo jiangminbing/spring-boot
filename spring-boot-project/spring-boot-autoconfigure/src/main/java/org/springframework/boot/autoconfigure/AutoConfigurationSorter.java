@@ -100,7 +100,8 @@ class AutoConfigurationSorter {
 	}
 
 	private static class AutoConfigurationClasses {
-
+		// 自动化配置类中对应注解前置配置类和后置配置类  对应的 自动配置类集合信息
+		// WebMvcAutoConfiguration为例  DispatcherServletAutoConfiguration.calss.getName 和 WebMvcAutoConfiguration 这种对应关系
 		private final Map<String, AutoConfigurationClass> classes = new HashMap<>();
 
 		AutoConfigurationClasses(MetadataReaderFactory metadataReaderFactory,
@@ -126,6 +127,7 @@ class AutoConfigurationSorter {
 						this.classes.put(className, autoConfigurationClass);
 					}
 					if (available) {
+						// 递归匹配出所有的配置类 对应前置后置的配置类
 						addToClasses(metadataReaderFactory, autoConfigurationMetadata,
 								autoConfigurationClass.getBefore(), false);
 						addToClasses(metadataReaderFactory, autoConfigurationMetadata,
@@ -206,6 +208,10 @@ class AutoConfigurationSorter {
 			return this.after;
 		}
 
+		/**
+		 * 获取配置配置文件中order的序号,序号不存在使用默认AutoConfigureOrder.DEFAULT_ORDER
+		 * @return
+		 */
 		private int getOrder() {
 			if (wasProcessed()) {
 				return this.autoConfigurationMetadata.getInteger(this.className,
@@ -216,7 +222,7 @@ class AutoConfigurationSorter {
 			return (attributes != null) ? (Integer) attributes.get("value")
 					: AutoConfigureOrder.DEFAULT_ORDER;
 		}
-
+        // 这个方法判断自动配置类是否在spring-autoconfigure-metadata.properies
 		private boolean wasProcessed() {
 			return (this.autoConfigurationMetadata != null
 					&& this.autoConfigurationMetadata.wasProcessed(this.className));
